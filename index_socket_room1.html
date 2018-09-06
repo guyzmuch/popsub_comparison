@@ -16,6 +16,8 @@
     <body>
         <h1>room 1</h1>
 
+        <p id="alert">
+        </p>
         <div>
           <p>List of users</p>
           <ul id="user_list">
@@ -65,6 +67,9 @@
 
                   $('#user_list').prepend('<li>' + pseudo + '</li>');
                 }
+            })
+            socket.on('event_room__1', function(message) {
+                $('#alert').prepend(message);
             })
 
             // Lorsqu'on envoie le formulaire, on transmet le message et on l'affiche sur la page

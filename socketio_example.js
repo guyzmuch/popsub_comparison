@@ -26,6 +26,11 @@ app.get('/room3', function (req, res) {
   res.sendfile(__dirname + '/index_socket_room3.html');
 });
 
+
+app.get('/room1/event', function (req, res) {
+  socket.broadcast.emit('event_room_'+data.room, req.data.message);
+});
+
 io.sockets.on('connection', function (socket, pseudo) {
     // Dès qu'on nous donne un pseudo, on le stocke en variable de session et on informe les autres personnes
     socket.on('nouveau_client', function(data) {
