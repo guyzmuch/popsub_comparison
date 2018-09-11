@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Super Chat temps réel !</title>
+        <title>Super Chat -- room 1</title>
         <style>
             #zone_chat strong {
                 color: white;
@@ -63,12 +63,12 @@
 
             socket.on('users_room_1', function(room_users) {
                 $('#user_list').html('');
-                for (let user in room_users){
-
-                  $('#user_list').prepend('<li>' + pseudo + '</li>');
+                for (let user of room_users){
+                  $('#user_list').prepend('<li>' + user + '</li>');
                 }
             })
-            socket.on('event_room__1', function(message) {
+            socket.on('general_event', function(message) {
+                $('#alert').html('');
                 $('#alert').prepend(message);
             })
 

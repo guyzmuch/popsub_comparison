@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Super Chat temps réel !</title>
+        <title>Super Chat -- room 2</title>
         <style>
             #zone_chat strong {
                 color: white;
@@ -14,8 +14,10 @@
     </head>
 
     <body>
-        <h1>room 1</h1>
+        <h1>room 2</h1>
 
+        <p id="alert">
+        </p>
         <form action="/" method="post" id="formulaire_chat">
             <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
             <input type="submit" id="envoi_message" value="Envoyer" />
@@ -51,6 +53,18 @@
                 $('#zone_chat').prepend('<p><em>' + pseudo + ' est parti !</em></p>');
             })
 
+
+
+            socket.on('users_room_2', function(room_users) {
+                $('#user_list').html('');
+                for (let user of room_users){
+                  $('#user_list').prepend('<li>' + user + '</li>');
+                }
+            })
+            socket.on('general_event', function(message) {
+                $('#alert').html('');
+                $('#alert').prepend(message);
+            })
             // Lorsqu'on envoie le formulaire, on transmet le message et on l'affiche sur la page
             $('#formulaire_chat').submit(function () {
                 var message = $('#message').val();

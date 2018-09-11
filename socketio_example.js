@@ -3,8 +3,10 @@ var app = require('express')(),
     io = require('socket.io').listen(server),
     ent = require('ent'), // Permet de bloquer les caractères HTML (sécurité équivalente à htmlentities en PHP)
     fs = require('fs');
+var bodyParser = require('body-parser');
 
-
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 var rooms = {
 
 }
@@ -27,8 +29,9 @@ app.get('/room3', function (req, res) {
 });
 
 
-app.get('/room1/event', function (req, res) {
-  socket.broadcast.emit('event_room_'+data.room, req.data.message);
+
+app.post('/broadcast', function (req, res) {
+  io.emit('general_event', req.body.data);
 });
 
 io.sockets.on('connection', function (socket, pseudo) {
@@ -36,6 +39,7 @@ io.sockets.on('connection', function (socket, pseudo) {
     socket.on('nouveau_client', function(data) {
         pseudo = ent.encode(data.pseudo);
         socket.pseudo = data.pseudo
+        socket.room = data.room
 
         if (!rooms[data.room]){
           rooms[data.room] = {
@@ -47,26 +51,28 @@ io.sockets.on('connection', function (socket, pseudo) {
         sockets[socket.pseudo] = data.room
 
 
-
+    
         socket.on('disconnect', function () {
           delete sockets[socket.pseudo]
-          for (let i=0, iLen = rooms[data.room].users.length; i < iLen; i++){
-            if (rooms[data.room].users[i] === socket.pseudo){
-              rooms[data.room].users.splice(i, 1)
+          for (let i=0, iLen = rooms[socket.room].users.length; i < iLen; i++){
+            if (rooms[socket.room].users[i] === socket.pseudo){
+              rooms[socket.room].users.splice(i, 1)
             }
           }
-          socket.broadcast.emit('leave_client_room_'+data.room, data.pseudo);
-          socket.broadcast.emit('users_room_'+data.room, rooms[data.room].users);
+          socket.broadcast.emit('leave_client_room_'+socket.room, socket.pseudo);
+          socket.broadcast.emit('users_room_'+socket.room, rooms[socket.room].users);
         });
-
-        socket.on('message_room_'+data.room, function (message) {
+    
+        socket.on('message_room_'+socket.room, function (message) {
             message = ent.encode(message);
-            socket.broadcast.emit('message_room_'+data.room, {pseudo: socket.pseudo, message: message});
+            socket.broadcast.emit('message_room_'+socket.room, {pseudo: socket.pseudo, message: message});
         });
 
-        socket.broadcast.emit('nouveau_client_room_'+data.room, data.pseudo);
-        socket.broadcast.emit('users_room_'+data.room, rooms[data.room].users);
+
+        socket.broadcast.emit('nouveau_client_room_'+socket.room, socket.pseudo);
+        socket.broadcast.emit('users_room_'+socket.room, rooms[socket.room].users);
     });
+
 
 });
 
